@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epic Games</title>
+    <style>
+        /* --- ESTILOS (Mesmos de antes) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        :root { --bg-color: #121212; --card-bg: #202020; --text-primary: #f5f5f5; --text-secondary: #a0a0a0; --accent-blue: #0078f2; }
+        body { background-color: var(--bg-color); color: var(--text-primary); padding-bottom: 50px; }
+        
+        /* Container */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Header simples */
+        header { height: 60px; background-color: #2a2a2a; display: flex; align-items: center; padding: 0 20px; margin-bottom: 30px;}
+        .logo { font-weight: bold; font-size: 1.2rem; }
+
+        /* Grid de Jogos */
+        .section-title { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        /* Card do Jogo */
+        .game-card { cursor: pointer; transition: transform 0.2s; }
+        .game-card:hover { transform: translateY(-5px); }
+
+        .card-image {
+            width: 100%;
+            aspect-ratio: 16/9; /* Formato padrão da RAWG */
+            background-color: #333;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .card-image img { width: 100%; height: 100%; object-fit: cover; }
+
+        .game-title { font-size: 1rem; font-weight: bold; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .game-info { font-size: 0.8rem; color: var(--text-secondary); display: flex; justify-content: space-between;}
+        .rating-badge { background-color: #333; padding: 2px 6px; border-radius: 4px; border: 1px solid #444; }
+        
+        /* Loading */
+        #loading { text-align: center; color: var(--text-secondary); margin-top: 50px; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Projeto Web</h1>
+    <nav>
+      <ul class="menu">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="eu.html">Sobre mim</a></li>
+        <li>
+          <a href="#">Meus projetos</a>
+          <ul class="submenu">
+            <li><a href="tabelas.html">Tabelas</a></li>
+            <li><a href="listas.html">Listas</a></li>
+            <li><a href="formulario.html">Formulários</a></li>
+            <li><a href="menus.html">Menus</a></li>
+            <li><a href="petshop.html">PetShop</a></li>
+            <li><a href="cards.html">Cards</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="periodica.html">Tabela periodica</a></li>
+            <li><a href="jogos.html">Jogos</a></li>
+            <li><a href="biografia.html">Biografia lattes</a></li>
+            <li><a href="biblioteca.html">Biblioteca digital</a></li>
+            <li><a href="fotografia.html">Fotografia</a></li>
+            <li><a href="hotel.html">Hotel fazenda</a></li>
+          </ul>
+        </li>
+        <li><a href="contatos.html">Contatos</a></li>
+        </ul>
+    </nav>
+  </header>
+    <header>
+        <div class="logo">EPIC GAMES <span style="font-size:0.8rem; color:gray">by Artur</span></div>
+    </header>
+
+    <div class="container">
+        <div class="section-title">
+            <h3>Jogos Populares e Novos</h3>
+        </div>
+
+        <div id="loading">Carregando jogos da API...</div>
+        <div class="games-grid" id="games-container">
+            </div>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO DA API ---
+        // IMPORTANTE: Coloque sua chave aqui
+        const apiKey = '356be1425a3849fe9ff15f750ea2ce28'; 
+        
+        // URL da API: Busca jogos ordenados por data de lançamento e popularidade
+        const apiUrl = `https://api.rawg.io/api/games?key=${apiKey}&dates=2023-01-01,2025-12-31&ordering=-added&page_size=12`;
+
+        const container = document.getElementById('games-container');
+        const loading = document.getElementById('loading');
+
+        // Função Assíncrona para buscar os dados
+        async function carregarJogos() {
+            try {
+                // 1. Faz a requisição para a API
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                // 2. Esconde a mensagem de carregamento
+                loading.style.display = 'none';
+
+                // 3. Loop para criar cada card
+                data.results.forEach(game => {
+                    criarCardJogo(game);
+                });
+
+            } catch (error) {
+                console.error("Erro ao buscar jogos:", error);
+                loading.innerHTML = "Erro ao carregar os jogos. Verifique sua API Key ou o console (F12).";
+            }
+        }
+
+        // Função para montar o HTML de cada jogo
+        function criarCardJogo(game) {
+            // Cria a div do card
+            const card = document.createElement('div');
+            card.classList.add('game-card');
+
+            // Monta o conteúdo HTML
+            card.innerHTML = `
+                <div class="card-image">
+                    <img src="${game.background_image}" alt="${game.name}">
+                </div>
+                <div class="game-title">${game.name}</div>
+                <div class="game-info">
+                    <span>${game.genres[0]?.name || 'Geral'}</span>
+                    <span class="rating-badge">⭐ ${game.rating}</span>
+                </div>
+            `;
+
+            // Adiciona o card ao container principal
+            container.appendChild(card);
+        }
+
+        // Inicia o carregamento ao abrir a tela
+        carregarJogos();
+    </script>
+</body>
+</html>
